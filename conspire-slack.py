@@ -16,6 +16,9 @@ slack = api.API(conspire_key)
 if not os.path.exists(logfile):
     open(logfile, 'x').close()
 
+def get_user_name(id):
+    return slack.get_user_name(id)
+
 def echo(message):
     print(message)
     with open(logfile, 'a') as logfileobj:
@@ -34,21 +37,21 @@ signup = set()
 
 def inform_players():
     for target_id, kappa_id in kappa.items():
-        pb_send(target_id, "{kappa_name} can cap you.".format(kappa_name=slack.get_user_name(kappa_id)))
+        pb_send(target_id, "{kappa_name} can cap you.".format(kappa_name=get_user_name(kappa_id)))
 
 def sign_up(message):
     signup.add(message['user'])
-    pb_send(message['channel'], "%s has signed up." % slack.get_user_name(message['user']))
-    echo("User %s signed up." % slack.get_user_name(message['user']))
+    pb_send(message['channel'], "%s has signed up." % get_user_name(message['user']))
+    echo("User %s signed up." % get_user_name(message['user']))
 
 def sign_down(message):
     signup.remove(message['user'])
-    pb_send(message['channel'], "%s has signed down." % slack.get_user_name(message['user']))
-    echo("User %s signed down." % slack.get_user_name(message['user']))
+    pb_send(message['channel'], "%s has signed down." % get_user_name(message['user']))
+    echo("User %s signed down." % get_user_name(message['user']))
 
 def admin(command):
     def decorated(message):
-        if 'user' in message and slack.get_user_name(message['user']) in admins:
+        if 'user' in message and get_user_name(message['user']) in admins:
             command(message)
     return decorated
 
@@ -89,7 +92,7 @@ def promote(message):
         return
     admins.append(user_name)
     pb_send(channel, "Promoted %s to admin." % user_name)
-    echo("User %s promoted %s" % (slack.get_user_name(message['user']), user_name))
+    echo("User %s promoted %s" % (get_user_name(message['user']), user_name))
 
 @admin
 def demote(message):
@@ -101,7 +104,7 @@ def demote(message):
         return
     admins.remove(user_name)
     pb_send(channel, "Demoted %s to user." % user_name)
-    echo("User %s demoted %s" % (slack.get_user_name(message['user']), user_name))
+    echo("User %s demoted %s" % (get_user_name(message['user']), user_name))
 
 def end_routine():
     global kappa, swapreq, signup, functions, main_channel, eliminated
@@ -158,9 +161,9 @@ def show_kappa(sharer, target, format="{default_message}", back_format="{default
     if sharer not in kappa:
         pb_send(sharer, "You cannot share anything in response as you are eliminated.")
     sharer_kappa = kappa[sharer]
-    sharer_name = slack.get_user_name(sharer)
-    sharer_kappa_name = slack.get_user_name(sharer_kappa)
-    target_name = slack.get_user_name(target)
+    sharer_name = get_user_name(sharer)
+    sharer_kappa_name = get_user_name(sharer_kappa)
+    target_name = get_user_name(target)
     fargs = {
         'sharer': sharer_name,
         'sharer_kappa': sharer_kappa_name,
@@ -203,17 +206,17 @@ def kswap(message):
 def cap(message):
     target_name = '_'.join(message['text'].split()[2:])
     caller = message['user']
-    caller_name = slack.get_user_name(caller)
+    caller_name = get_user_name(caller)
     if target_name in slack.users:
         target = slack.users[target_name].id
         if target not in kappa:
             pb_send(message['channel'], target_name + (" has already been eliminated!" if target in eliminated else " is not playing this game."))
         elif kappa[target]==caller:
             eliminate(target,'capped')
-            echo("User %s capped %s." % (slack.get_user_name(caller), slack.get_user_name(target)))
+            echo("User %s capped %s." % (get_user_name(caller), get_user_name(target)))
         else:
             eliminate(caller,'failed')
-            echo("User %s capped the wrong target (%s)." % (slack.get_user_name(caller), slack.get_user_name(target)))
+            echo("User %s capped the wrong target (%s)." % (get_user_name(caller), get_user_name(target)))
     else:
         pb_send(message['channel'], "Player \"{}\" not found.".format(target_name))
 
@@ -221,30 +224,30 @@ def cap(message):
 @player
 def resign(message):
     eliminate(message['user'], 'resigned')
-    echo(slack.get_user_name(message['user']) + " resigned.")
+    echo(get_user_name(message['user']) + " resigned.")
 
 @admin
 def terminate(message):
     global running
     running = False
     pb_send(message['channel'], "Program terminated")
-    echo("User %s terminated the server." % slack.get_user_name(message['user']))
+    echo("User %s terminated the server." % get_user_name(message['user']))
 
 def list_players(message):
-    text = '*Players left alive:*\n```' + '\n'.join(sorted([slack.get_user_name(x) for x in kappa])) + '```'
+    text = '*Players left alive:*\n```' + '\n'.join(sorted([get_user_name(x) for x in kappa])) + '```'
     if len(eliminated) > 0:
         text += '\n*Players eliminated:*\n```' + '\n'.join(sorted(eliminated)) + '```'
     pb_send(message['channel'], text)
 
 def list_signers(message):
-    pb_send(message['channel'], '*Players signed up:*\n```' + '\n'.join(sorted([slack.get_user_name(x) for x in signup])) + '```')
+    pb_send(message['channel'], '*Players signed up:*\n```' + '\n'.join(sorted([get_user_name(x) for x in signup])) + '```')
 
 def ping(message):
     pb_send(message['channel'], "pong")
 
 @admin
 def log(message):
-    echo("%s: %s" % (slack.get_user_name(message['user']), ' '.join(message['text'].split()[2:])))
+    echo("%s: %s" % (get_user_name(message['user']), ' '.join(message['text'].split()[2:])))
 
 functions = prep_functions = {
     r'gm sign ?up': sign_up,
@@ -280,9 +283,9 @@ elim_msg = {
 
 def eliminate(id, reason, wrong_target_name = ''):
     has_new_target = kappa.pop(id)
-    name = slack.get_user_name(id)
+    name = get_user_name(id)
     eliminated.append(name)
-    has_new_target_name = slack.get_user_name(has_new_target)
+    has_new_target_name = get_user_name(has_new_target)
     has_new_kappa = [k for k in kappa if kappa[k] == id][0]
     pb_send(main_channel, elim_msg[reason].format(elim=name, capped_by=has_new_target_name, wrong_target=wrong_target_name))
     if has_new_target == has_new_kappa:
