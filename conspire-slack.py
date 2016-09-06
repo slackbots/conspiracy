@@ -316,7 +316,7 @@ functions = prep_functions = {
     r'gm promote .+': promote,
     r'gm demote .+': demote,
     r'gm refresh': refresh,
-    r'gm broadcast': broadcast,
+    r'gm broadcast': broadcast
 }.items()
 
 game_functions = {
