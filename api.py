@@ -119,23 +119,6 @@ class API:
             print("Posting to #" + channel + "...")
             self.post_as_bot(channel, message)
 
-    def get_message_counts(self, channel=''):
-        message_counts = []
-        print("Counting messages...")
-        for user in self.users:
-            messages_by_user = requests.get(
-                'https://slack.com/api/search.messages',
-                params={
-                    'token': self.token,
-                    'query': 'from:' + user + (' in:' + channel if channel else ''),
-                    'count': 1
-                }
-            ).json()['messages']['paging']['total']
-            if not self.users[user].deleted:
-                message_counts.append((user, messages_by_user))
-        message_counts.sort(key=lambda x: x[1], reverse=True)
-        return message_counts
-
     def post_loop(self):
         username = input('username: ')
         emoji = input('emoji: ')
