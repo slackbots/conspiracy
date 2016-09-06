@@ -4,7 +4,6 @@ import random
 import sys
 from datetime import datetime
 
-import requests
 api = __import__('api')
 websocket = __import__('websocket')
 
@@ -16,13 +15,16 @@ slack = api.API(conspire_key)
 if not os.path.exists(logfile):
     open(logfile, 'x').close()
 
+
 def get_user_name(id):
     return slack.get_user_name(id)
+
 
 def echo(message):
     print(message)
     with open(logfile, 'a') as logfileobj:
         logfileobj.write(message + '\n')
+
 
 def pb_send(channel, message):
     slack.post_as_bot(
@@ -32,28 +34,34 @@ def pb_send(channel, message):
         ':tophat:'
     )
 
-admins = ['spivee','lyneca']
+
+admins = ['spivee', 'lyneca']
 signup = set()
+
 
 def inform_players():
     for target_id, kappa_id in kappa.items():
         pb_send(target_id, "{kappa_name} can cap you.".format(kappa_name=get_user_name(kappa_id)))
+
 
 def sign_up(message):
     signup.add(message['user'])
     pb_send(message['channel'], "%s has signed up." % get_user_name(message['user']))
     echo("User %s signed up." % get_user_name(message['user']))
 
+
 def sign_down(message):
     signup.remove(message['user'])
     pb_send(message['channel'], "%s has signed down." % get_user_name(message['user']))
     echo("User %s signed down." % get_user_name(message['user']))
+
 
 def admin(command):
     def decorated(message):
         if 'user' in message and get_user_name(message['user']) in admins:
             command(message)
     return decorated
+
 
 def player(command):
     def decorated(message):
@@ -63,6 +71,7 @@ def player(command):
             else:
                 pb_send(message['channel'], "You must be playing to use that command.")
     return decorated
+
 
 @admin
 def start_game(message):
@@ -82,6 +91,7 @@ def start_game(message):
     echo("Game started.")
     inform_players()
 
+
 @admin
 def promote(message):
     channel = message['channel']
@@ -93,6 +103,7 @@ def promote(message):
     admins.append(user_name)
     pb_send(channel, "Promoted %s to admin." % user_name)
     echo("User %s promoted %s" % (get_user_name(message['user']), user_name))
+
 
 @admin
 def demote(message):
@@ -106,6 +117,7 @@ def demote(message):
     pb_send(channel, "Demoted %s to user." % user_name)
     echo("User %s demoted %s" % (get_user_name(message['user']), user_name))
 
+
 def end_routine():
     global kappa, swapreq, signup, functions, main_channel, eliminated
     del kappa
@@ -115,11 +127,13 @@ def end_routine():
     signup = set()
     functions = prep_functions
 
+
 @admin
 def end_game(message):
     end_routine()
     pb_send(message['channel'], "Game ended.")
     echo("Game ended.")
+
 
 def save_routine():
     out = open('kappa.dat', 'w')
@@ -132,11 +146,13 @@ def save_routine():
     out.write('\n'.join(eliminated))
     out.close()
 
+
 @admin
 def save_game(message):
     save_routine()
     pb_send(message['channel'], "Game successfully saved.")
     echo("Game saved.")
+
 
 @admin
 def load_game(message):
@@ -157,8 +173,10 @@ def load_game(message):
     echo("Game loaded.")
     inform_players()
 
+
 def refresh(message):
     slack.refresh()
+
 
 def show_kappa(sharer, target, format="{default_message}", back_format="{default_message}"):
     if sharer not in kappa:
@@ -175,7 +193,9 @@ def show_kappa(sharer, target, format="{default_message}", back_format="{default
     default_forward = "{sharer} has shared with you that {sharer_kappa} can cap them.".format(**fargs)
     default_backward = "{target} has been informed of your kappa.".format(**fargs)
     pb_send(target, format.format(default_message=default_forward, **fargs))
-    if back_format: pb_send(sharer, format.format(default_message=default_backward, **fargs))
+    if back_format:
+        pb_send(sharer, format.format(default_message=default_backward, **fargs))
+
 
 @player
 def kswap(message):
@@ -205,6 +225,7 @@ def kswap(message):
         elif flag == 'direct':
             show_kappa(sharer=caller, target=target)
 
+
 @player
 def cap(message):
     target_name = '_'.join(message['text'].split()[2:])
@@ -214,11 +235,11 @@ def cap(message):
         target = slack.users[target_name].id
         if target not in kappa:
             pb_send(message['channel'], target_name + (" has already been eliminated!" if target in eliminated else " is not playing this game."))
-        elif kappa[target]==caller:
-            eliminate(target,'capped')
+        elif kappa[target] == caller:
+            eliminate(target, 'capped')
             echo("User %s capped %s." % (get_user_name(caller), get_user_name(target)))
         else:
-            eliminate(caller,'failed')
+            eliminate(caller, 'failed')
             echo("User %s capped the wrong target (%s)." % (get_user_name(caller), get_user_name(target)))
     else:
         pb_send(message['channel'], "Player \"{}\" not found.".format(target_name))
@@ -229,12 +250,14 @@ def resign(message):
     eliminate(message['user'], 'resigned')
     echo(get_user_name(message['user']) + " resigned.")
 
+
 @admin
 def terminate(message):
     global running
     running = False
-    pb_send(message['channel'], "Program terminated")
+    pb_send(message['channel'], "Program terminated.")
     echo("User %s terminated the server." % get_user_name(message['user']))
+
 
 def list_players(message):
     text = '*Players left alive:*\n```' + '\n'.join(sorted([get_user_name(x) for x in kappa])) + '```'
@@ -242,11 +265,14 @@ def list_players(message):
         text += '\n*Players eliminated:*\n```' + '\n'.join(sorted(eliminated)) + '```'
     pb_send(message['channel'], text)
 
+
 def list_signers(message):
     pb_send(message['channel'], '*Players signed up:*\n```' + '\n'.join(sorted([get_user_name(x) for x in signup])) + '```')
 
+
 def ping(message):
     pb_send(message['channel'], "pong")
+
 
 @admin
 def log(message):
@@ -285,7 +311,8 @@ elim_msg = {
     'failed': '{elim} capped the wrong player, ({wrong_target}) and has been eliminated!',
 }
 
-def eliminate(id, reason, wrong_target_name = ''):
+
+def eliminate(id, reason, wrong_target_name=''):
     has_new_target = kappa.pop(id)
     name = get_user_name(id)
     eliminated.append(name)
@@ -329,7 +356,7 @@ while running:
                     echo("Exception: " + e)
                     sys.exit()
                 continue
-       # for response in responses:
-       #     if re.match(response, n['text']):
-       #         pb_send(n['channel'], responses[response])
-       #         continue
+# for response in responses:
+#     if re.match(response, n['text']):
+#         pb_send(n['channel'], responses[response])
+#         continue
