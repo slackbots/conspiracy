@@ -47,7 +47,7 @@ def inform_players():
 def sign_up(message):
     text = message['text'].replace('sign up', 'signup')
     if len(text.split()) > 2 and get_user_name(message['user']) in admins:
-        user = text.split()[2]
+        user = slack.users[text.split()[2]].id
     else:
         user = message['user']
     signup.add(user)
@@ -58,7 +58,7 @@ def sign_up(message):
 def sign_down(message):
     text = message['text'].replace('sign down', 'signdown')
     if len(text.split()) > 2 and get_user_name(message['user']) in admins:
-        user = text.split()[2]
+        user = slack.users[text.split()[2]].id
     else:
         user = message['user']
     signup.remove(user)
@@ -290,8 +290,8 @@ def log(message):
     echo("%s: %s" % (get_user_name(message['user']), ' '.join(message['text'].split()[2:])))
 
 functions = prep_functions = {
-    r'gm sign ?up ?.+': sign_up,
-    r'gm sign ?down ?.+': sign_down,
+    r'gm sign ?up.*': sign_up,
+    r'gm sign ?down.*': sign_down,
     r'gm start': start_game,
     r'gm load': load_game,
     r'gm terminate': terminate,
