@@ -271,6 +271,13 @@ def resign(message):
 
 
 @admin
+def broadcast(message):
+    text = ' '.join(message['text'].split()[2:])
+    echo(message['user'] + ' broadcasted "' + text + '"')
+    pb_send(slack.channels['events'].id, text)
+
+
+@admin
 def terminate(message):
     global running
     running = False
@@ -309,6 +316,7 @@ functions = prep_functions = {
     r'gm promote .+': promote,
     r'gm demote .+': demote,
     r'gm refresh': refresh,
+    r'gm broadcast': broadcast,
 }.items()
 
 game_functions = {
@@ -322,6 +330,7 @@ game_functions = {
     r'gm log .+': log,
     r'gm promote .+': promote,
     r'gm demote .+': demote,
+    r'gm broadcast': broadcast,
 }.items()
 
 elim_msg = {
