@@ -47,7 +47,11 @@ def inform_players():
 def sign_up(message):
     text = message['text'].replace('sign up', 'signup')
     if len(text.split()) > 2 and get_user_name(message['user']) in admins:
-        user = slack.users[text.split()[2]].id
+        if text.split()[2] in slack.users:
+            user = slack.users[text.split()[2]].id
+        else:
+            pb_send(message['channel'], "%s is not a valid user." % text.split()[2])
+            return
     else:
         user = message['user']
     signup.add(user)
@@ -58,7 +62,11 @@ def sign_up(message):
 def sign_down(message):
     text = message['text'].replace('sign down', 'signdown')
     if len(text.split()) > 2 and get_user_name(message['user']) in admins:
-        user = slack.users[text.split()[2]].id
+        if text.split()[2] in slack.users:
+            user = slack.users[text.split()[2]].id
+        else:
+            pb_send(message['channel'], "%s is not a valid user." % text.split()[2])
+            return
     else:
         user = message['user']
     signup.remove(user)
