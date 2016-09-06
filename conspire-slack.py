@@ -256,10 +256,10 @@ def cap(message):
             pb_send(message['channel'], target_name + (" has already been eliminated!" if target in eliminated else " is not playing this game."))
         elif kappa[target] == caller:
             eliminate(target, 'capped')
-            echo("User %s capped %s." % (get_user_name(caller), get_user_name(target)))
+            echo("User %s capped %s." % (caller_name, get_user_name(target)))
         else:
             eliminate(caller, 'failed')
-            echo("User %s capped the wrong target (%s)." % (get_user_name(caller), get_user_name(target)))
+            echo("User %s capped the wrong target (%s)." % (caller_name, get_user_name(target)))
     else:
         pb_send(message['channel'], "Player \"{}\" not found.".format(target_name))
 
