@@ -45,15 +45,25 @@ def inform_players():
 
 
 def sign_up(message):
-    signup.add(message['user'])
-    pb_send(message['channel'], "%s has signed up." % get_user_name(message['user']))
-    echo("User %s signed up." % get_user_name(message['user']))
+    text = message['text'].replace('sign up', 'signup')
+    if len(text.split()) > 2 and get_user_name(message['user']) in admins:
+        user = text.split()[2]
+    else:
+        user = message['user']
+    signup.add(user)
+    pb_send(message['channel'], "%s has signed up." % get_user_name(user))
+    echo("User %s signed up." % get_user_name(user))
 
 
 def sign_down(message):
-    signup.remove(message['user'])
-    pb_send(message['channel'], "%s has signed down." % get_user_name(message['user']))
-    echo("User %s signed down." % get_user_name(message['user']))
+    text = message['text'].replace('sign down', 'signdown')
+    if len(text.split()) > 2 and get_user_name(message['user']) in admins:
+        user = text.split()[2]
+    else:
+        user = message['user']
+    signup.remove(user)
+    pb_send(message['channel'], "%s has signed down." % get_user_name(user))
+    echo("User %s signed down." % get_user_name(user))
 
 
 def admin(command):
@@ -280,8 +290,8 @@ def log(message):
     echo("%s: %s" % (get_user_name(message['user']), ' '.join(message['text'].split()[2:])))
 
 functions = prep_functions = {
-    r'gm sign ?up': sign_up,
-    r'gm sign ?down': sign_down,
+    r'gm sign ?up ?.+': sign_up,
+    r'gm sign ?down ?.+': sign_down,
     r'gm start': start_game,
     r'gm load': load_game,
     r'gm terminate': terminate,
