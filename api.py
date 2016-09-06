@@ -28,14 +28,14 @@ class User:
 
 
 class API:
-    def refresh():
+    def refresh(self):
         self.team_name, self.team_id, self.team_domain = self._get_team_info()
         self.channels = self._get_channels()
         self.users = self._get_users()
 
     def __init__(self, token):
         self.token = token
-        refresh()
+        self.refresh()
         self.keys = {}
 
     def _get_team_info(self):
