@@ -349,7 +349,7 @@ while running:
         datetime.fromtimestamp(float(n['ts'])) > init_time if 'ts' in n else False
     ]):
         for key, func in functions:
-            if re.match(key, n['text']):
+            if re.match(key, n['text'].lower()):
                 try:
                     func(n)
                 except Exception as e:
