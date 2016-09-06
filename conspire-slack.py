@@ -193,7 +193,7 @@ def load_game(message):
 
 
 def refresh(message):
-    echo("User %s triggered a refresh" % get_user_name(ssage['user']))
+    echo("User %s triggered a refresh" % get_user_name(message['user']))
     slack.refresh()
 
 
@@ -316,7 +316,7 @@ functions = prep_functions = {
     r'gm promote .+': promote,
     r'gm demote .+': demote,
     r'gm refresh': refresh,
-    r'gm broadcast': broadcast
+    r'gm broadcast': broadcast,
 }.items()
 
 game_functions = {
