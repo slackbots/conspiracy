@@ -175,6 +175,7 @@ def load_game(message):
 
 
 def refresh(message):
+    echo("User %s triggered a refresh" % get_user_name(ssage['user']))
     slack.refresh()
 
 
