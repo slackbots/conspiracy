@@ -157,6 +157,9 @@ def load_game(message):
     echo("Game loaded.")
     inform_players()
 
+def refresh(message):
+    slack.refresh()
+
 def show_kappa(sharer, target, format="{default_message}", back_format="{default_message}"):
     if sharer not in kappa:
         pb_send(sharer, "You cannot share anything in response as you are eliminated.")
@@ -260,6 +263,7 @@ functions = prep_functions = {
     r'gm log .+': log,
     r'gm promote .+': promote,
     r'gm demote .+': demote,
+    r'gm refresh': refresh,
 }.items()
 
 game_functions = {
