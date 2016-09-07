@@ -219,6 +219,16 @@ def show_kappa(sharer, target, format="{default_message}", back_format="{default
 
 
 @player
+def fakeinfo(message):
+    string = message['text']
+    sender = message['user']
+    target = string.split()[3]
+    kappa = string.split()[2]
+    send(sender, "%s has shared with you that %s can cap them." % (target, kappa))
+    send(sender, "In response, %s has been informed of your kappa." % target)
+
+
+@player
 def kswap(message):
     string = message['text']
     words = string.split()[2:]
@@ -298,7 +308,7 @@ def list_players(message):
 
 def list_signers(message):
     send(message['channel'],
-            '*Players signed up:*\n```' + '\n'.join(sorted([get_user_name(x) for x in signup])) + '```')
+         '*Players signed up:*\n```' + '\n'.join(sorted([get_user_name(x) for x in signup])) + '```')
 
 
 def ping(message):
@@ -327,6 +337,7 @@ functions = prep_functions = {
 
 game_functions = {
     r'gm kswap .+': kswap,
+    r'gm fakeinfo .+': fakeinfo,
     r'gm cap .+': cap,
     r'gm resign .+': resign,
     r'gm end': end_game,
