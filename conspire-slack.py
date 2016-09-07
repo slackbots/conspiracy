@@ -181,10 +181,10 @@ def load_game(message):
     main_channel = message['channel']
     del signup
     kappaf = open('kappa.dat')
-    kappa = dict(line.rstrip().split(': ') for line in kappaf)
+    kappa = {line.rstrip().split(': ')[0]: line.rstrip().split(': ')[1] for line in kappaf}
     kappaf.close()
     swapf = open('swapreq.dat')
-    swapreq = set(line.rstrip().split(': ') for line in swapf)
+    swapreq = {tuple(line.rstrip().split(': ')) for line in swapf}
     swapf.close()
     elimf = open('eliminated.dat')
     eliminated = [line.rstrip() for line in elimf]
@@ -216,6 +216,16 @@ def show_kappa(sharer, target, format="{default_message}", back_format="{default
     send(target, format.format(default_message=default_forward, **fargs))
     if back_format:
         send(sharer, format.format(default_message=default_backward, **fargs))
+
+
+@player
+def fakeinfo(message):
+    string = message['text']
+    sender = message['user']
+    target = string.split()[3]
+    kappa = string.split()[2]
+    send(sender, "%s has shared with you that %s can cap them." % (target, kappa))
+    send(sender, "In response, %s has been informed of your kappa." % target)
 
 
 @player
@@ -298,7 +308,7 @@ def list_players(message):
 
 def list_signers(message):
     send(message['channel'],
-            '*Players signed up:*\n```' + '\n'.join(sorted([get_user_name(x) for x in signup])) + '```')
+         '*Players signed up:*\n```' + '\n'.join(sorted([get_user_name(x) for x in signup])) + '```')
 
 
 def ping(message):
@@ -327,6 +337,7 @@ functions = prep_functions = {
 
 game_functions = {
     r'gm kswap .+': kswap,
+    r'gm fakeinfo .+': fakeinfo,
     r'gm cap .+': cap,
     r'gm resign .+': resign,
     r'gm end': end_game,
@@ -388,12 +399,12 @@ while running:
                 n['text'] = line
                 if re.match(key, line):
                     not_command = False
-                    try:
-                        func(n)
-                    except Exception as e:
-                        send(slack.channels['events'].id, "Program terminated due to exception: `" + str(e) + '`')
-                        echo("Exception: " + str(e))
-                        sys.exit()
+                    # try:
+                    func(n)
+                    # except Exception as e:
+                    #     send(slack.channels['events'].id, "Program terminated due to exception: `" + str(e) + '`')
+                    #     echo("Exception: " + e.message)
+                    #     sys.exit()
                     continue
 
             if line.split()[0] == 'gm' and not_command:
