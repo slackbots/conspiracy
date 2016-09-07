@@ -181,7 +181,7 @@ def load_game(message):
     main_channel = message['channel']
     del signup
     kappaf = open('kappa.dat')
-    kappa = dict(line.rstrip().split(': ') for line in kappaf)
+    kappa = {line.rstrip().split(': ')[0]: line.rstrip().split(': ')[1] for line in kappaf}
     kappaf.close()
     swapf = open('swapreq.dat')
     swapreq = set(line.rstrip().split(': ') for line in swapf)
