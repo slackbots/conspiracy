@@ -383,11 +383,11 @@ while running:
             ]):
         original_message = n['text']
         for line in original_message.lower().split('\n'):
+            not_command = True
             for key, func in functions:
                 n['text'] = line
-                # print(key, line)
                 if re.match(key, line):
-                    # print("yes: " + line)
+                    not_command = False
                     try:
                         func(n)
                     except Exception as e:
@@ -395,6 +395,9 @@ while running:
                         echo("Exception: " + str(e))
                         sys.exit()
                     continue
+
+            if line.split()[0] == 'gm' and not_command:
+                send(n['channel'], "Invalid `gm` command.")
 # for response in responses:
 #     if re.match(response, n['text']):
 #         pb_send(n['channel'], responses[response])
