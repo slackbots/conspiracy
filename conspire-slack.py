@@ -184,7 +184,7 @@ def load_game(message):
     kappa = {line.rstrip().split(': ')[0]: line.rstrip().split(': ')[1] for line in kappaf}
     kappaf.close()
     swapf = open('swapreq.dat')
-    swapreq = set([line.rstrip().split(': ') for line in swapf])
+    swapreq = {line.rstrip().split(': ') for line in swapf}
     swapf.close()
     elimf = open('eliminated.dat')
     eliminated = [line.rstrip() for line in elimf]
