@@ -78,6 +78,7 @@ def admin(command):
     def decorated(message):
         if 'user' in message and get_user_name(message['user']) in admins:
             command(message)
+
     return decorated
 
 
@@ -88,6 +89,7 @@ def player(command):
                 command(message)
             else:
                 pb_send(message['channel'], "You must be playing to use that command.")
+
     return decorated
 
 
@@ -101,7 +103,7 @@ def start_game(message):
     eliminated = []
     chain = list(signup)
     random.shuffle(chain)
-    kappa = {chain[i-1]: chain[i] for i in range(len(chain))}
+    kappa = {chain[i - 1]: chain[i] for i in range(len(chain))}
     del signup
     swapreq = set()
     functions = game_functions
@@ -238,7 +240,8 @@ def kswap(message):
         if (target, caller) in swapreq:  # happens whether flag is 'direct' or 'delay'
             swapreq.remove((target, caller))
             show_kappa(sharer=caller, target=target)
-            show_kappa(sharer=target, target=caller, format="In response, {default_message}", back_format="In response, {default_message}")
+            show_kappa(sharer=target, target=caller, format="In response, {default_message}",
+                       back_format="In response, {default_message}")
         elif flag == 'delay':
             swapreq.add((caller, target))
         elif flag == 'direct':
@@ -253,7 +256,8 @@ def cap(message):
     if target_name in slack.users:
         target = slack.users[target_name].id
         if target not in kappa:
-            pb_send(message['channel'], target_name + (" has already been eliminated!" if target in eliminated else " is not playing this game."))
+            pb_send(message['channel'], target_name + (
+                " has already been eliminated!" if target in eliminated else " is not playing this game."))
         elif kappa[target] == caller:
             eliminate(target, 'capped')
             echo("User %s capped %s." % (caller_name, get_user_name(target)))
@@ -293,7 +297,8 @@ def list_players(message):
 
 
 def list_signers(message):
-    pb_send(message['channel'], '*Players signed up:*\n```' + '\n'.join(sorted([get_user_name(x) for x in signup])) + '```')
+    pb_send(message['channel'],
+            '*Players signed up:*\n```' + '\n'.join(sorted([get_user_name(x) for x in signup])) + '```')
 
 
 def ping(message):
@@ -303,6 +308,7 @@ def ping(message):
 @admin
 def log(message):
     echo("%s: %s" % (get_user_name(message['user']), ' '.join(message['text'].split()[2:])))
+
 
 functions = prep_functions = {
     r'gm sign ?up.*': sign_up,
@@ -346,16 +352,19 @@ def eliminate(id, reason, wrong_target_name=''):
     eliminated.append(name)
     has_new_target_name = get_user_name(has_new_target)
     has_new_kappa = [k for k in kappa if kappa[k] == id][0]
-    pb_send(main_channel, elim_msg[reason].format(elim=name, capped_by=has_new_target_name, wrong_target=wrong_target_name))
+    pb_send(main_channel,
+            elim_msg[reason].format(elim=name, capped_by=has_new_target_name, wrong_target=wrong_target_name))
     if has_new_target == has_new_kappa:
         eliminated.append(has_new_target_name)
         eliminated.reverse()
-        pb_send(main_channel, "The game is over! The results are as follows: \n```" + '\n'.join(str(num+1).rjust(2) + ': ' + place for num, place in enumerate(eliminated)) + '```')
+        pb_send(main_channel, "The game is over! The results are as follows: \n```" + '\n'.join(
+            str(num + 1).rjust(2) + ': ' + place for num, place in enumerate(eliminated)) + '```')
         end_routine()
     else:
         kappa[has_new_kappa] = has_new_target
         pb_send(has_new_kappa, "{new_kappa} can now cap you.".format(new_kappa=has_new_target_name))
         save_routine()
+
 
 w = websocket.WebSocket()
 print("Connecting to socket...")
@@ -369,12 +378,9 @@ while running:
     n = w.next().replace('true', 'True').replace('false', 'False').replace('none', 'None').replace('null', 'None')
     # print(n)
     n = eval(n)
-    if all([
-        n['type'] == 'message' if 'type' in n else False,
-        n['hidden'] if 'hidden' in n else True,  # why is this here
-        'bot_id' not in n,
-        datetime.fromtimestamp(float(n['ts'])) > init_time if 'ts' in n else False
-    ]):
+    if all([n['type'] == 'message' if 'type' in n else False, n['hidden'] if 'hidden' in n else True, 'bot_id' not in n,
+            datetime.fromtimestamp(float(n['ts'])) > init_time if 'ts' in n else False
+            ]):
         original_message = n['text']
         for line in original_message.lower().split('\n'):
             for key, func in functions:
@@ -386,7 +392,7 @@ while running:
                         func(n)
                     except Exception as e:
                         pb_send(slack.channels['events'].id, "Program terminated due to exception: `" + str(e) + '`')
-                        echo("Exception: " + e)
+                        echo("Exception: " + str(e))
                         sys.exit()
                     continue
 # for response in responses:
