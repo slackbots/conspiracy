@@ -5,7 +5,9 @@ from random import shuffle
 class Player:
     def __init__(self, name, id):
         self.name = name  # str
-        self.id = id      # any hashable object
+        self.id = id  # any hashable object
+        self.target = None  # temporary until the list is linked
+        self.kappa = None  # ^^
 
     def link_kappa(self, kappa):
         self.kappa = ref(kappa)
@@ -21,6 +23,6 @@ class ConspiracyData:
         self.player_names = {player.name: player for player in players}
         self.eliminated = []
         players = list(players)  # not copy() cuz players could be immutable
-        players.shuffle()
+        shuffle(players)
         for i in range(len(players)):
-            players[i-1].link_kappa(players[i])
+            players[i - 1].link_kappa(players[i])
