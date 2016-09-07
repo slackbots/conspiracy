@@ -370,20 +370,25 @@ while running:
     # print(n)
     n = eval(n)
     if all([
-        n['type'] == 'message',
+        n['type'] == 'message' if 'type' in n else False,
         n['hidden'] if 'hidden' in n else True,  # why is this here
         'bot_id' not in n,
         datetime.fromtimestamp(float(n['ts'])) > init_time if 'ts' in n else False
     ]):
-        for key, func in functions:
-            if re.match(key, n['text'].lower()):
-                try:
-                    func(n)
-                except Exception as e:
-                    pb_send(slack.channels['events'].id, "Program terminated due to exception: `" + str(e) + '`')
-                    echo("Exception: " + e)
-                    sys.exit()
-                continue
+        original_message = n['text']
+        for line in original_message.lower().split('\n'):
+            for key, func in functions:
+                n['text'] = line
+                # print(key, line)
+                if re.match(key, line):
+                    # print("yes: " + line)
+                    try:
+                        func(n)
+                    except Exception as e:
+                        pb_send(slack.channels['events'].id, "Program terminated due to exception: `" + str(e) + '`')
+                        echo("Exception: " + e)
+                        sys.exit()
+                    continue
 # for response in responses:
 #     if re.match(response, n['text']):
 #         pb_send(n['channel'], responses[response])
