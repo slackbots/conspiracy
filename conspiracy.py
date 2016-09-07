@@ -1,17 +1,19 @@
 from weakref import ref
 from random import shuffle
 
+
 class Player:
     def __init__(self, name, id):
         self.name = name  # str
         self.id = id      # any hashable object
-    
+
     def link_kappa(self, kappa):
         self.kappa = ref(kappa)
         kappa.target = ref(self)
-    
+
     def eliminate(self):
         self.target().link_kappa(self.kappa())
+
 
 class ConspiracyData:
     def __init__(self, players):
@@ -20,5 +22,5 @@ class ConspiracyData:
         self.eliminated = []
         players = list(players)  # not copy() cuz players could be immutable
         players.shuffle()
-        for i in range(len(players))
+        for i in range(len(players)):
             players[i-1].link_kappa(players[i])
