@@ -121,10 +121,3 @@ class API:
         for channel in self.channels:
             print("Posting to #" + channel + "...")
             self.post_as_bot(channel, message)
-
-    def post_loop(self):
-        username = input('username: ')
-        emoji = input('emoji: ')
-        channel = input('channel: ')
-        while True:
-            self.post_as_bot(channel, input('> '), username, emoji)
