@@ -384,6 +384,7 @@ init_time = datetime.now()
 w.connect(wss_url)
 print("Ready.")
 send(slack.channels['events'].id, "Game server up.")
+load_game({'channel': slack.channels['events'].id})
 running = True
 while running:
     n = w.next().replace('true', 'True').replace('false', 'False').replace('none', 'None').replace('null', 'None')
@@ -399,12 +400,12 @@ while running:
                 n['text'] = line
                 if re.match(key, line):
                     not_command = False
-                    # try:
-                    func(n)
-                    # except Exception as e:
-                    #     send(slack.channels['events'].id, "Program terminated due to exception: `" + str(e) + '`')
-                    #     echo("Exception: " + e.message)
-                    #     sys.exit()
+                    try:
+                        func(n)
+                    except Exception as e:
+                        send(slack.channels['events'].id, "Program terminated due to exception: `" + str(e) + '`')
+                        echo("Exception: " + str(e))
+                        sys.exit()
                     continue
 
             if line.split()[0] == 'gm' and not_command:
