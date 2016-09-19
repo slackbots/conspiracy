@@ -42,6 +42,11 @@ class ConspiracyData:
         self.playing.remove(player.name)
         self.eliminated.add(player.name)
         Player.eliminate(player)
+        if len(playing) == 1:
+            self._finished()
+
+    def _finished(self):
+        pass
 
 
 class ConspiracyGame(ConspiracyData):
@@ -82,6 +87,9 @@ class ConspiracyGame(ConspiracyData):
         else:
             self.swapreq.add((player.id, target.id))
             self.output.kswap_proposal(player, target)
+
+    def _finished(self):
+        output.game_end(playing + eliminated[::-1]) # players still alive in alphabetical order, followed by eliminated players from most recent to least recent elimination
 
 
 class basic_output:  # this entire class can be passed as an output object to ConspiracyGame
